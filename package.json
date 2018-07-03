@@ -1,5 +1,10 @@
 {
-  "name": "Locale_Sheets_to_JSON",
+  "name": "csv-to-separate-json",
+  "author": "erozak",
+  "repository": {
+    "url": "git@github.com:erozak/CSV-to-Separate-JSON.git",
+    "type": "git"
+  },
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
