@@ -39,6 +39,7 @@ npm run start file [...otherFiles]
 
 | Short | Full            | Args         | Description        | Default          |
 |:-----:|:---------------:|:------------:|:------------------:|:----------------:|
-| -d    | --destination   | [folder]     | Destination folder | `./translations` |
+| -k    | --key           | [column key] | Key column         | `id`             |
+| -d    | --destination   | [folder]     | Destination folder | `./dist`         |
 | -s    | --seperator     | [delimeter]  | Column Seperator   | `,`              |
 | -i    | --ignoreColumns | [string,...] | Ignore Columns     | `(null)`         |

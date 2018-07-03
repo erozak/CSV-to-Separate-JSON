@@ -6,35 +6,42 @@ const mkdirp = require('mkdirp');
 
 program
   .version('1.0.0')
+  .option('-k, --key <n>', 'Key id')
   .option('-d, --destination <n>', 'Destination folder')
   .option('-s, --separator <n>', 'Column Separator')
   .option('-i, --ignoreColumns [value]', 'Ignore Columns')
   .parse(process.argv);
 
-console.log(`\n${chalk.white`---[:`} Start converting locale sheets ${chalk.white`:]---`}`);
+console.info(`\n${chalk.white`---[:`} Start converting locale sheets ${chalk.white`:]---`}`);
 const eventTag = (tag) => chalk.bgBlue.rgb(0,0,0)(`\n ${tag} \n`);
 const prettyArray = (arr) => chalk.white`\n  - ` + arr.join(chalk.white`\n  - `);
 
 // Get Args
-console.log(eventTag('Args'));
+console.info(eventTag('Args'));
 
 const files = Array.from(program.args);
-console.log('Sheets:', prettyArray(files));
+console.info('Sheets:', files.length > 1 ? prettyArray(files) : files[0]);
 
-const destination = program.destination || './translations';
-console.log('Output:', destination);
+const destination = program.destination || './dist';
+console.info('Output:', destination);
 
 const separator = program.separator || ',';
-console.log('Separator:', `"${separator}"`);
+console.info('Separator:', separator);
+
+const key = program.key || 'id';
+console.info('Key:', key);
 
 const ignoreColumns = program.ignoreColumns ? program.ignoreColumns.split(',') : [];
-console.log('ignoreColumns:', prettyArray(ignoreColumns));
+if (ignoreColumns.length > 0) {
+  console.info('ignoreColumns:', ignoreColumns > 1 ? prettyArray(ignoreColumns) : ignoreColumns[0]);
+}
 
 
 // Convert
-console.log(eventTag('Result'));
+console.info(eventTag('Result'));
 
 require('./converter')({
+  key,
   files,
   destination,
   separator,
@@ -46,7 +53,7 @@ require('./converter')({
 
       mkdirp(filePath, (err) => {
         if (err) {
-          console.error(`\n${chalk.red`Save Failed:`}`, error);
+          console.error(`${chalk.red`Save Failed:`}`, error);
           return;
         }
 
@@ -60,15 +67,15 @@ require('./converter')({
             flag: 'a+',
           });
         } catch(error) {
-          console.error(`\n${chalk.red`Save Failed:`}`, error);
+          console.error(`${chalk.red`Save Failed:`}`, error);
           return;
         }
 
-        console.log(chalk.cyan`Saved`, output);
+        console.info(chalk.cyan`Saved`, output);
       });
     },
     (error) => {
-      console.error(`\n${chalk.red`Failed:`}`, error);
+      console.error(`${chalk.red`Failed:`}`, error.message);
     },
 );
 

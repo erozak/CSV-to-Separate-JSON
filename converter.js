@@ -15,61 +15,64 @@ const flatMapAsWritingContext = (group) => flatMap((converted) => from(
     })),
 ));
 
-const reduceRawJson = reduce((acc, row) => {
-  const { id, ...translations } = row;
-  const locales = Object.keys(translations);
+const reduceRawJson = (key) => reduce((acc, row) => {
+  const keyColumn = row[key];
+  if (!keyColumn) {
+    throw new Error('Invalid key column');
+  }
 
-  locales.forEach((locale) => {
-    if (!acc[locale]) {
-      acc[locale] = {};
+  const otherColumns = Object.keys(row).filter((column) => column !== key);
+
+  otherColumns.forEach((column) => {
+    if (!acc[column]) {
+      acc[column] = {};
     }
 
-    acc[locale][id] = translations[locale];
+    acc[column][keyColumn] = row[column];
   });
 
   return acc;
 }, {});
 
-function convertCsvToRawJson(filePath, group = '', options = {}) {
+function convertCsvToRawJson(filePath, options = {}) {
+  const { key, group, ...csvToJsonOptions } = options;
+  const resolvedFilePath = path.resolve(process.cwd(), filePath);
+
   return fromPromise(
-    csvToJson(options).fromFile(filePath)
+    csvToJson(csvToJsonOptions).fromFile(resolvedFilePath)
   ).pipe(
     switchMap(from),
-    reduceRawJson,
+    reduceRawJson(key),
     flatMapAsWritingContext(group),
   );
 }
 
-const flatMapAsConvert$ = (isSingle, options) => flatMap((file) => {
-  const group = isSingle ? '' : path.basename(file, '.csv');
-
-  return convertCsvToRawJson(file, group, options)
-});
-
 const filterValidFile = filter((file) => {
   if (path.extname(file) !== '.csv') {
-    console.log(chalk.magenta`Invalid:`, file);
+    console.warn(chalk.magenta`Invalid:`, file);
     return false;
   }
 
   try {
     fs.accessSync(path.resolve(process.cwd(), file));
   } catch(error) {
-    console.log(chalk.magenta`Not exist:`, file);
+    console.warn(chalk.magenta`Not exist:`, file);
     return false;
   }
 
   return true;
 });
 
-module.exports = function convertLocaleSheetsToJSON({ files, separator, ignoreColumns }) {
+module.exports = function convertLocaleSheetsToJSON({ files, ignoreColumns, key, ...otherOptions }) {
   const isSingle = files.length === 1;
 
   return from(files).pipe(
     filterValidFile,
-    flatMapAsConvert$(isSingle, {
-      delimiter: separator,
-      ignoreColumns: new RegExp(`(${ignoreColumns.join('|')})`, 'i'),
-    }),
+    flatMap((file) => convertCsvToRawJson(file, {
+      key,
+      group: isSingle ? '' : path.basename(file, '.csv'),
+      ignoreColumns: ignoreColumns.length > 0 ? new RegExp(`(${ignoreColumns.join('|')})`, 'i') : undefined,
+      ...otherOptions,
+    })),
   )
 }
