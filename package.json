@@ -1,0 +1,19 @@
+{
+  "name": "Locale_Sheets_to_JSON",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "chalk": "^2.4.1",
+    "command-line-args": "^5.0.2",
+    "commander": "^2.16.0",
+    "csvtojson": "^2.0.4",
+    "fs": "^0.0.1-security",
+    "mkdirp": "^0.5.1",
+    "path": "^0.12.7",
+    "rxjs": "^6.2.1"
+  }
+}
