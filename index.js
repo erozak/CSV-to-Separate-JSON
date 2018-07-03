@@ -6,9 +6,9 @@ const mkdirp = require('mkdirp');
 
 program
   .version('1.0.0')
-  .option('-d, --destination [folder]', 'Destination folder')
-  .option('-s, --seperator [delimeter]', 'Column Seperator')
-  .option('-i, --ignoreColumns [string,...]', 'Ignore Columns')
+  .option('-d, --destination <n>', 'Destination folder')
+  .option('-s, --separator <n>', 'Column Separator')
+  .option('-i, --ignoreColumns [value]', 'Ignore Columns')
   .parse(process.argv);
 
 console.log(`\n${chalk.white`---[:`} Start converting locale sheets ${chalk.white`:]---`}`);
@@ -24,8 +24,8 @@ console.log('Sheets:', prettyArray(files));
 const destination = program.destination || './translations';
 console.log('Output:', destination);
 
-const seperator = program.seperator || ',';
-console.log('Seperator:', `"${seperator}"`);
+const separator = program.separator || ',';
+console.log('Separator:', `"${separator}"`);
 
 const ignoreColumns = program.ignoreColumns ? program.ignoreColumns.split(',') : [];
 console.log('ignoreColumns:', prettyArray(ignoreColumns));
@@ -37,12 +37,12 @@ console.log(eventTag('Result'));
 require('./converter')({
   files,
   destination,
-  seperator,
+  separator,
   ignoreColumns,
 })
   .subscribe(
     ({ locale, group, translation }) => {
-      const filePath = path.join(destination, group || '');
+      const filePath = path.join(destination, group);
 
       mkdirp(filePath, (err) => {
         if (err) {
@@ -55,7 +55,7 @@ require('./converter')({
         const output = path.join(filePath, fileName);
 
         try {
-          fs.writeFileSync(output, data, {
+          fs.writeFileSync(path.resolve(process.cwd(), output), data, {
             encoding: 'utf8',
             flag: 'a+',
           });

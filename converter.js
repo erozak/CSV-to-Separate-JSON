@@ -53,7 +53,7 @@ const filterValidFile = filter((file) => {
   }
 
   try {
-    fs.accessSync(file);
+    fs.accessSync(path.resolve(process.cwd(), file));
   } catch(error) {
     console.log(chalk.magenta`Not exist:`, file);
     return false;
@@ -62,13 +62,13 @@ const filterValidFile = filter((file) => {
   return true;
 });
 
-module.exports = function convertLocaleSheetsToJSON({ files, seperator, ignoreColumns }) {
+module.exports = function convertLocaleSheetsToJSON({ files, separator, ignoreColumns }) {
   const isSingle = files.length === 1;
 
   return from(files).pipe(
     filterValidFile,
     flatMapAsConvert$(isSingle, {
-      delimiter: seperator,
+      delimiter: separator,
       ignoreColumns: new RegExp(`(${ignoreColumns.join('|')})`, 'i'),
     }),
   )
